@@ -117,11 +117,11 @@ int round_manager(int time, int max_num, char mode){
 }
 
 int range_selection(){
-  int range;
+  int range = -1;
 
   pc.printf("\nPlease select the range of possible numbers \nMax Number (0-F): ");
 
-  while(range == NULL){
+  while(range == -1){
     char response = key_input();
     pc.printf("%c\n", response);
       
