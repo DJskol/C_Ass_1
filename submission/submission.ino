@@ -58,7 +58,13 @@ int getswitches(){
 
 char rand_gen(int max_num){
   int rand_int = rand()%max_num;
-  if ()
+  if (rand_int > 9){
+    switch(rand_int){
+      case 11:
+
+        break;
+    }
+  }
   return ;
 }
 
@@ -126,27 +132,27 @@ int range_selection(){
     pc.printf("%c\n", response);
       
     if(isdigit(response)){
-      range = (int)response;
+      range = (int)response + 1;
       break;
     }else{
       switch(response){
         case 'A':
-          range = 10;
-          break;
-        case 'B':
           range = 11;
           break;
-        case 'C':
+        case 'B':
           range = 12;
           break;
-        case 'D':
+        case 'C':
           range = 13;
           break;
-        case 'E':
+        case 'D':
           range = 14;
           break;
-        case 'F':
+        case 'E':
           range = 15;
+          break;
+        case 'F':
+          range = 16;
           break;
         default:
           pc.printf("\nError, Please choose from the Menu\n");
