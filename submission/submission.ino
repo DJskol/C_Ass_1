@@ -91,12 +91,12 @@ int round_manager(int time, int max_num, char mode){
   
   //singleplayer or multiplayer
   if(mode == 's'){
-    String displayInt = rand_gen(max_num);
+    String displayInt = String(rand_gen(max_num));
     int round_len = 0;
     
     while(1){
-      for(int i = 0; i<round_len, i++){
-        displayInt += rand_gen();
+      for(int i = 0; i<round_len; i++){
+        displayInt += String(rand_gen(max_num));
       }
 
       lcd.cls();
@@ -104,40 +104,43 @@ int round_manager(int time, int max_num, char mode){
       lcd.printf("%s", displayInt.c_str());
       wait_us(time*WAIT_US);
       lcd.cls();
+      lcd.locate(0,0);
+      lcd.printf("Please enter your Answer:");
+      pc.printf("\nPlease Enter your Answer: ");
+      lcd.locate(0,1);
       
-      while(1){
-        lcd.cls();
-        lcd.locate(0,0);
-        lcd.printf("Please input the sequence: ");
-        pc.printf("\nPlease input the sequence: ");
-
+      for(int i = 0; i<strlen(displayInt.c_str()); i++){
+        char checker_char = displayInt[i];
         char response = key_input();
-        if ((int)response < max_num){
 
-          lcd.cls();
-          lcd.locate(0,0);
-          lcd.printf("Please input the sequence: ");
-          lcd.locate(0,1);
-          lcd.printf(num_input)
-          pc.printf("\nPlease input the sequence: ");
-
-          if (){
-
+        
+        if (response != checker_char){
+          
+          lcd.printf("%c", response);
+          pc.printf("%c", response);
+          
+          if(i == strlen(displayInt.c_str()) - 1){
+            result += 1;
           }
+
         }else{
           lcd.cls();
           lcd.locate(0,0);
-          lcd.printf("Wrong!, Round End");
+          lcd.printf("Game Over :(");
+          
           lcd.locate(0,1);
           lcd.printf("Result: %d", result);
-          break;
+          
+          wait_us(5*WAIT_US);
+
+          lcd.cls();
+
+          return result;
         }
       }
     }
 
-    pc.printf("%d\r\n", randInt);
   }
-  return result;
 }
 
 int range_selection(){
@@ -226,14 +229,14 @@ char game_start(){
     pc.printf("%c\n", response);
     if (response == '1'){
       pc.printf("\n[  --  Singleplay Mode  --  ]\n");
-      mode = "s";
+      mode = 's';
       break;
     }else if (response == '2'){
-      mode = "m";
+      mode = 'm';
       pc.printf("\n[  --  Multiplayer Mode  --  ]\n");
       break;
     }else if(response == '3'){
-      mode = "q";
+      mode = 'q';
       break;
     }else{
       pc.printf("\nError, Please choose from the Menu\n");
