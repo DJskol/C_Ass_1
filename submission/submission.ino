@@ -58,22 +58,40 @@ int getswitches(){
 
 char rand_gen(int max_num){
   int rand_int = rand()%max_num;
+  char rand_char = (char) rand_int;
   if (rand_int > 9){
     switch(rand_int){
+      case 10:
+        rand_char = 'A';
+        break;
       case 11:
-
+        rand_char = 'B';
+        break;
+      case 12:
+        rand_char = 'C';
+        break;
+      case 13:
+        rand_char = 'D';
+        break;
+      case 14:
+        rand_char = 'E';
+        break;
+      case 15:
+        rand_char = 'F';
         break;
     }
   }
-  return ;
+  return rand_char;
 }
 
 int round_manager(int time, int max_num, char mode){
+  //universal result
+  int result = 0;
+  int randInt = rand(); //throwaway Random Int
+  
+  //singleplayer or multiplayer
   if(mode == 's'){
-    int result = 0;
-    int randInt = rand(); //throwaway Random Int
-
-    char displayInt = rand_gen(max_num);
+    String displayInt = rand_gen(max_num);
     int round_len = 0;
     
     while(1){
@@ -83,7 +101,7 @@ int round_manager(int time, int max_num, char mode){
 
       lcd.cls();
       lcd.locate(0,0);
-      lcd.printf("%d", displayInt);
+      lcd.printf("%s", displayInt.c_str());
       wait_us(time*WAIT_US);
       lcd.cls();
       
@@ -94,7 +112,7 @@ int round_manager(int time, int max_num, char mode){
         pc.printf("\nPlease input the sequence: ");
 
         char response = key_input();
-        if ((int)response < max_num + 1){
+        if ((int)response < max_num){
 
           lcd.cls();
           lcd.locate(0,0);
@@ -118,8 +136,8 @@ int round_manager(int time, int max_num, char mode){
     }
 
     pc.printf("%d\r\n", randInt);
-    return result;
   }
+  return result;
 }
 
 int range_selection(){
@@ -131,7 +149,7 @@ int range_selection(){
     char response = key_input();
     pc.printf("%c\n", response);
       
-    if(isdigit(response)){
+    if(isdigit(response) &&  response != '0'){
       range = (int)response + 1;
       break;
     }else{
@@ -155,7 +173,7 @@ int range_selection(){
           range = 16;
           break;
         default:
-          pc.printf("\nError, Please choose from the Menu\n");
+          pc.printf("\nError, Please choose a Valid Value\n");
           break;
       }
     }
@@ -252,6 +270,6 @@ int main(){
 
     // pc.printf("%d ", time);
     // pc.printf("%d", range);
-    // pc.printf("%d, 3);
+    // pc.printf("%d, result);
   }
 }
