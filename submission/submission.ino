@@ -153,7 +153,8 @@ int range_selection(){
     pc.printf("%c\n", response);
       
     if(isdigit(response) &&  response != '0'){
-      range = (int)response + 1;
+      range = (response - '0') + 1;
+      pc.printf("%d %c",range, response);
       break;
     }else{
       switch(response){
