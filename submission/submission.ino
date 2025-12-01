@@ -102,10 +102,11 @@ int round_manager(int time, int max_num, char mode){
       lcd.cls();
       lcd.locate(0,0);
       lcd.printf("%s", displayInt.c_str());
+      pc.printf("%s", displayInt);
       wait_us(time*WAIT_US);
       lcd.cls();
       lcd.locate(0,0);
-      lcd.printf("Please enter your Answer:");
+      lcd.printf("Answer:");
       pc.printf("\nPlease Enter your Answer: ");
       lcd.locate(0,1);
       
@@ -114,10 +115,12 @@ int round_manager(int time, int max_num, char mode){
         char response = key_input();
 
         
-        if (response != checker_char){
+        if (response == checker_char){
           
           lcd.printf("%c", response);
           pc.printf("%c", response);
+          
+          round_len += 1;
           
           if(i == strlen(displayInt.c_str()) - 1){
             result += 1;
@@ -154,7 +157,7 @@ int range_selection(){
       
     if(isdigit(response) &&  response != '0'){
       range = (response - '0') + 1;
-      pc.printf("%d %c",range, response);
+      // pc.printf("%d %c",range, response);
       break;
     }else{
       switch(response){
