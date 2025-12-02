@@ -2,6 +2,7 @@
 #include "USBSerial.h"
 #include <time.h>
 #include "TextLCD/TextLCD.cpp"
+#include <stdlib.h>
 #include <ctype.h>
 
 #define WAIT_US 1000000 // multiplier to fix use of wait_us instead of wait 
@@ -58,7 +59,9 @@ int getswitches(){
 
 char rand_gen(int max_num){
   int rand_int = rand()%max_num;
-  char rand_char = (char) rand_int;
+  char rand_char = (char)rand_int;
+
+  pc.printf("%d %c", rand_int, rand_char);
   if (rand_int > 9){
     switch(rand_int){
       case 10:
@@ -88,21 +91,23 @@ int round_manager(int time, int max_num, char mode){
   //universal result
   int result = 0;
   int randInt = rand(); //throwaway Random Int
-  
+  pc.printf("%c ", rand_gen(max_num));
   //singleplayer or multiplayer
   if(mode == 's'){
-    String displayInt = String(rand_gen(max_num));
     int round_len = 0;
     
     while(1){
+      char displayInt[round_len+1];
       for(int i = 0; i<round_len; i++){
-        displayInt += String(rand_gen(max_num));
+        displayInt[i] = rand_gen(max_num);
       }
 
       lcd.cls();
       lcd.locate(0,0);
-      lcd.printf("%s", displayInt.c_str());
-      pc.printf("%s", displayInt);
+      lcd.printf("%s", displayInt);
+      for (int i = 0; i<strlen(displayInt); i++){
+        pc.printf("%c", displayInt[i]);
+      }
       wait_us(time*WAIT_US);
       lcd.cls();
       lcd.locate(0,0);
@@ -110,7 +115,7 @@ int round_manager(int time, int max_num, char mode){
       pc.printf("\nPlease Enter your Answer: ");
       lcd.locate(0,1);
       
-      for(int i = 0; i<strlen(displayInt.c_str()); i++){
+      for(int i = 0; i<strlen(displayInt); i++){
         char checker_char = displayInt[i];
         char response = key_input();
 
@@ -120,9 +125,11 @@ int round_manager(int time, int max_num, char mode){
           lcd.printf("%c", response);
           pc.printf("%c", response);
           
+          wait_us(0.5*WAIT_US);
+          
           round_len += 1;
           
-          if(i == strlen(displayInt.c_str()) - 1){
+          if(i == strlen(displayInt) - 1){
             result += 1;
           }
 
@@ -133,7 +140,7 @@ int round_manager(int time, int max_num, char mode){
           
           lcd.locate(0,1);
           lcd.printf("Result: %d", result);
-          
+
           wait_us(5*WAIT_US);
 
           lcd.cls();
@@ -149,14 +156,14 @@ int round_manager(int time, int max_num, char mode){
 int range_selection(){
   int range = -1;
 
-  pc.printf("\nPlease select the range of possible numbers \nMax Number (0-F): ");
-
   while(range == -1){
+    pc.printf("\nPlease select the range of possible numbers \nMax Number (0-F): ");
     char response = key_input();
     pc.printf("%c\n", response);
       
     if(isdigit(response) &&  response != '0'){
-      range = (response - '0') + 1;
+      range = response - '0' ;
+      range += 1;
       // pc.printf("%d %c",range, response);
       break;
     }else{
@@ -267,6 +274,7 @@ int main(){
     char mode = game_start();
 
     if (mode == 'q'){
+      pc.printf("\nGoodBye!\n");
       break;
     }
 
