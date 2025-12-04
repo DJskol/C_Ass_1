@@ -7,6 +7,8 @@
 #include <ctype.h>
 
 #define WAIT_US 1000000 // multiplier to fix use of wait_us instead of wait 
+#define MAX_PC_MESSAGE 512 
+
 //Default setup from labscripts
 using namespace mbed;
 USBSerial pc; // tx, rx
@@ -60,7 +62,9 @@ int get_switches(){
 
 //Custom code
 //Processing functions
+// int input_processing(char ){
 
+// }
 
 int main(){
   lcd.cls();
@@ -74,34 +78,41 @@ int main(){
 
   srand((unsigned)time(NULL));
 
+  for (int i = 0; i < 50; i++) {
+    pc.printf("\n");                //Clear Terminal
+  }
   int active = 1;
   
   while(active){
-    char raw_menu_choice = '0';
+    char pc_input[MAX_PC_MESSAGE];
+
     pc.printf("\nWelcome Player(s)\n");
-    
     pc.printf("\nPlease Choose Your Game Mode!\n");
     pc.printf("1: Singleplayer \n2: Multiplayer \n3:Quit \nAnswer: ");
-
-    while(1){
-      raw_menu_choice = pc.getc();
-      if(raw_menu_choice != '0'){
-        break;
-      }
+    
+    int i = 0;
+    pc_input[i] = pc.getc();
+    for(i = 1; i < MAX_PC_MESSAGE && pc.available(); i++){
+      pc_input[i] = pc.getc();
     }
+    pc_input[i] = '0';
 
-    switch(raw_menu_choice){
+    
+      
+    switch(pc_input[0]){
       case '1':
-        pc.printf("%d\n\n",raw_menu_choice);
+        pc.printf("%c\n\n",pc_input[0]);
         break;
       case '2':
-        pc.printf("%d\n\n",raw_menu_choice);
+        pc.printf("%c\n\n",pc_input[0]);
         break;
       case '3':
+        pc.printf("%c\n\n",pc_input[0]);
         pc.printf("Goodbye!\n\n");
         active = 0;
         break;
       default:
+        pc.printf("%c\n\n",pc_input[0]);
         pc.printf("Wrong Option, Please Choose Approprately\n\n");
         break;
     }
