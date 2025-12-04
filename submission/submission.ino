@@ -61,10 +61,23 @@ int get_switches(){
 }
 
 //Custom code
+//Input Code
+void get_pc_input(char* pc_input){  
+  int i = 0;
+
+  pc_input[i] = pc.getc();
+  for(i = 1; i < MAX_PC_MESSAGE && pc.available(); i++){
+    pc_input[i] = pc.getc();
+  }
+}
+
+
 //Processing functions
 // int input_processing(char ){
 
 // }
+
+
 
 int main(){
   lcd.cls();
@@ -81,41 +94,39 @@ int main(){
   for (int i = 0; i < 50; i++) {
     pc.printf("\n");                //Clear Terminal
   }
-  int active = 1;
   
-  while(active){
-    char pc_input[MAX_PC_MESSAGE];
+  int active = 1;  
+  char pc_input[MAX_PC_MESSAGE];
 
+  while(active){
     pc.printf("\nWelcome Player(s)\n");
     pc.printf("\nPlease Choose Your Game Mode!\n");
-    pc.printf("1: Singleplayer \n2: Multiplayer \n3:Quit \nAnswer: ");
+    pc.printf("1: Singleplayer \n2: Multiplayer \n3: Quit \nAnswer: ");
     
-    int i = 0;
-    pc_input[i] = pc.getc();
-    for(i = 1; i < MAX_PC_MESSAGE && pc.available(); i++){
-      pc_input[i] = pc.getc();
-    }
-    pc_input[i] = '0';
+    get_pc_input(pc_input);
 
-    
+    if(pc_input[1] == '\n'){
+
+      switch(pc_input[0]){
+        case '1':
+          pc.printf("%c\n\n",pc_input[0]);
+          break;
+        case '2':
+          pc.printf("%c\n\n",pc_input[0]);
+          break;
+        case '3':
+          pc.printf("%c\n\n",pc_input[0]);
+          pc.printf("Goodbye!\n\n");
+          active = 0;
+          break;
+        default:
+          pc.printf("%c\n\n",pc_input[0]);
+          pc.printf("Wrong Option, Please Choose Approprately\n\n");
+          break;
+      }
       
-    switch(pc_input[0]){
-      case '1':
-        pc.printf("%c\n\n",pc_input[0]);
-        break;
-      case '2':
-        pc.printf("%c\n\n",pc_input[0]);
-        break;
-      case '3':
-        pc.printf("%c\n\n",pc_input[0]);
-        pc.printf("Goodbye!\n\n");
-        active = 0;
-        break;
-      default:
-        pc.printf("%c\n\n",pc_input[0]);
-        pc.printf("Wrong Option, Please Choose Approprately\n\n");
-        break;
+    }else{
+      pc.printf("Too Many Inputs, Please Only 1 Option from the Menu\n\n");
     }
-    
   }
 }
