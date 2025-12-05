@@ -60,8 +60,6 @@ int get_switches(){
   return switches;
 }
 
-//Custom code
-//Input Code
 void get_pc_input(char* pc_input){  
   int i = 0;
 
@@ -70,14 +68,6 @@ void get_pc_input(char* pc_input){
     pc_input[i] = pc.getc();
   }
 }
-
-
-//Processing functions
-// int input_processing(char ){
-
-// }
-
-
 
 int main(){
   lcd.cls();
