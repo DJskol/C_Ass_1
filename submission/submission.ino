@@ -19,6 +19,9 @@ BusIn bus_in(p11,p10,p9,p8);
 DigitalOut cs(p5);
 DigitalOut myled(p21); 
 
+char pc_input[MAX_PC_MESSAGE];
+int input_message_length = 0;
+
 char Keytable[] = { 'F', 'E', 'D', 'C', 
 '3', '6', '9', 'B', 
 '2', '5', '8', '0', 
@@ -60,12 +63,181 @@ int get_switches(){
   return switches;
 }
 
-void get_pc_input(char* pc_input){  
+void clear_serial_monitor(){
+  for (int i = 0; i < 100; i++) {
+    pc.printf("\n");                //Clear Terminal
+  }
+}
+
+void get_pc_input(char* pc_input, int* input_message_length){  
   int i = 0;
+  int message_length = 0;
 
   pc_input[i] = pc.getc();
   for(i = 1; i < MAX_PC_MESSAGE && pc.available(); i++){
     pc_input[i] = pc.getc();
+    message_length += 1;
+  }
+
+  *input_message_length =  message_length;
+}
+
+void singleplayer(){
+  int singleplayer_active = 0;
+  int display_time = get_display_time();
+  int max_digit = get_digit_range();
+  int round_number = 0;
+
+  srand((unsigned)time(NULL));
+
+  while(!singleplayer_active){
+    round_number += 1;
+    char rand_array[round_number];
+
+    for(int i = 0;i < round_number; i++){
+      rand_array[i] = rand_gen(max_digit);
+    }
+
+    pc.printf("\n\nSequence: ");
+    for(int i = 0; i < sizeof(rand_array); i++){
+      pc.printf("%c", rand_array[i]);
+    } 
+
+    wait_us(display_time * WAIT_US);
+
+    clear_serial_monitor();
+
+    get_pc_input(pc_input,&input_message_length);
+
+    for(int i = 0; i < input_message_length; i++){
+      pc.printf("%c", pc_input[i]);
+      if(pc_input[i] != rand_array[i] || input_message_length != sizeof(rand_array)){
+        singleplayer_active = 1;
+        break;
+      }else if(i == input_message_length - 1){
+        pc.printf("\nSuccess\n");
+      }
+    }
+  }
+  pc.printf("\nResult: %d", round_number);
+}
+
+char rand_gen(int max_digit){
+  int rand_int = rand();
+  rand_int = rand() % max_digit;
+  char rand_char;
+  switch(rand_int){
+    case 10:
+      rand_char = 'A';
+      break;
+    case 11:
+      rand_char = 'B';
+      break;
+    case 12:
+      rand_char = 'C';
+      break;
+    case 13:
+      rand_char = 'D';
+      break;
+    case 14:
+      rand_char = 'E';
+      break;
+    case 15:
+      rand_char = 'F';
+      break;
+    default:
+      rand_int += 48;
+      rand_char = (char)rand_int;
+      break;
+  }
+  // pc.printf("%c\n", rand_char);
+  // pc.printf("\n%d %c\n", rand_int,rand_char);
+  return rand_char;
+}
+
+int get_digit_range(){
+  int max_digit = -1;
+
+  while(max_digit == -1){
+    pc.printf("\nPlease select the range of possible numbers \nMax Number (1-F): ");
+
+    get_pc_input(pc_input,&input_message_length);
+
+    if(input_message_length == 1){
+      int number = atoi(pc_input);
+
+      if(number > 0 && number < 9){
+        max_digit = number + 1;
+      }else{
+        switch(toupper(pc_input[0])){
+          case 'A':
+            max_digit = 11;
+            break;
+          case 'B':
+            max_digit = 12;
+            break;
+          case 'C':
+            max_digit = 13;
+            break;
+          case 'D':
+            max_digit = 14;
+            break;
+          case 'E':
+            max_digit = 15;
+            break;
+          case 'F':
+            max_digit = 16;
+            break;
+          default:
+            pc.printf("Input Error, Please choose an option between 1-F (Hex)\n\n");
+            break;
+        }
+      }
+    }else{
+      pc.printf("Too Many Inputs, Please Only 1 Option from the Menu\n\n");
+    }
+    // pc.printf("%d\n",max_digit);
+  }
+  pc.printf("%c\n",pc_input[0]);
+  return max_digit;
+}
+
+int get_display_time(){
+  int time = -1;
+  while(time == -1){
+    pc.printf("\nSelect your Time Difficulty! \n1: Easy (7s)\n2: Medium (5s)\n3: Hard (2s)\n4: Back \nOption: ");
+    
+    get_pc_input(pc_input,&input_message_length);
+    
+    if(input_message_length == 1){
+      switch(pc_input[0]){
+        case '1':
+          time = 7;
+          pc.printf("%d\n", time);
+          pc.printf("\nLoading Easy Mode...\n");
+          break;
+        case '2':
+          time = 5;
+          pc.printf("%d\n", time);
+          pc.printf("\nLoading Medium Mode...\n");
+          break;
+        case '3':
+          time = 2;
+          pc.printf("%d\n", time);
+          pc.printf("\nLoading Hard Mode...\n");
+          break;
+        case '4':
+          time = 0;
+          break;
+        default:
+          pc.printf("Inputs Amount Error, Please Choose 1 Option from the Menu\n\n");
+          break;
+      }
+    }else{
+      pc.printf("Too Many Inputs, Please Only 1 Option from the Menu\n\n");
+    }
+    // pc.printf("\nTime: %d\n",time);
+    return time;
   }
 }
 
@@ -79,44 +251,41 @@ int main(){
   sw.write(0x0000);
   cs = 1;
 
-  srand((unsigned)time(NULL));
-
-  for (int i = 0; i < 50; i++) {
-    pc.printf("\n");                //Clear Terminal
-  }
+  clear_serial_monitor();
   
   int active = 1;  
-  char pc_input[MAX_PC_MESSAGE];
 
   while(active){
     pc.printf("\nWelcome Player(s)\n");
     pc.printf("\nPlease Choose Your Game Mode!\n");
     pc.printf("1: Singleplayer \n2: Multiplayer \n3: Quit \nAnswer: ");
-    
-    get_pc_input(pc_input);
 
-    if(pc_input[1] == '\n'){
+    get_pc_input(pc_input,&input_message_length);
+
+    if(input_message_length == 1){
 
       switch(pc_input[0]){
         case '1':
-          pc.printf("%c\n\n",pc_input[0]);
+          pc.printf("%c\n",pc_input[0]);
+          singleplayer();
           break;
         case '2':
-          pc.printf("%c\n\n",pc_input[0]);
+          pc.printf("%c\n",pc_input[0]);
+          // multiplayer();
           break;
         case '3':
-          pc.printf("%c\n\n",pc_input[0]);
+          pc.printf("%c\n",pc_input[0]);
           pc.printf("Goodbye!\n\n");
           active = 0;
           break;
         default:
           pc.printf("%c\n\n",pc_input[0]);
-          pc.printf("Wrong Option, Please Choose Approprately\n\n");
+          pc.printf("Wrong Option, Please Choose Appropriately\n\n");
           break;
       }
       
     }else{
-      pc.printf("Too Many Inputs, Please Only 1 Option from the Menu\n\n");
+      pc.printf("Inputs Amount Error, Please Choose 1 Option from the Menu\n\n");
     }
   }
 }
