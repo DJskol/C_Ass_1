@@ -214,7 +214,7 @@ int get_digit_range(){
     if(input_message_length == 1){
       int number = atoi(pc_input);
 
-      if(number > 0 && number < 9){
+      if(number > 0 && number < 10){
         max_digit = number + 1;
       }else{
         switch(toupper(pc_input[0])){
