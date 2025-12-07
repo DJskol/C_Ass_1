@@ -7,7 +7,7 @@
 #include <ctype.h>
 
 #define WAIT_US 1000000 // multiplier to fix use of wait_us instead of wait 
-#define MAX_PC_MESSAGE 512 
+#define MAX_PC_MESSAGE 256 
 
 //Default setup from labscripts
 using namespace mbed;
@@ -79,7 +79,7 @@ void get_pc_input(char* pc_input, int* input_message_length){
     message_length += 1;
   }
 
-  *input_message_length =  message_length;
+  *input_message_length =  message_length - 1;
 }
 
 void singleplayer(){
@@ -355,7 +355,7 @@ int main(){
           break;
         case '3':
           pc.printf("%c\n",pc_input[0]);
-          pc.printf("Goodbye!\n\n");
+          pc.printf("Goodbye!");
           active = 0;
           break;
         default:

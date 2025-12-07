@@ -57,6 +57,14 @@ int read_serial(Serial *serial, int timeout_ms) {
 }
 
 
+void clear_pc_serial_rx(int port) {
+    unsigned char dump[256];
+    int n;
+    do {
+        n = RS232_PollComport(port, dump, sizeof(dump));
+    } while (n > 0);
+}
+
 
 int main(){
     Serial serial;
@@ -73,21 +81,23 @@ int main(){
     }
     puts("Port opened, waiting for ARM Mbed...");
 
+    clear_pc_serial_rx(serial.port);
+
     char pc_input[BUFFER_SIZE];
 
     while (1) {
         int n = read_serial(&serial, TIMEOUT);
         printf("%s", (char *)serial.buffer);
-
-        if(!strcmp((char*)serial.buffer, "exit")){
+        if(!strcmp((char*)serial.buffer, "Goodbye!")){
             break;
         }else{
             fgets(pc_input,BUFFER_SIZE,stdin);
-            RS232_cputs(serial.port, pc_input);
+            wait_ms(300);
+            if(sizeof(pc_input)>2){
+                RS232_cputs(serial.port, pc_input);
+            }
         }
     }
-
-    printf("\"exit\" received. Closing port.\n");
 
     RS232_CloseComport(serial.port);
 
