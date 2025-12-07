@@ -9,6 +9,7 @@
 
 #define BUFFER_SIZE 256
 #define RECONNECTION_TIMER 1000
+#define TIMEOUT 10
 
 void wait_ms(int ms){
 #ifdef _WIN32
@@ -74,10 +75,16 @@ int main(){
 
     char pc_input[BUFFER_SIZE];
 
-    while (strcmp((char*)serial.buffer, "exit")) {
-        printf("%s\n", (char *)serial.buffer);
-        scanf("%s", pc_input);
-        RS232_cputs(serial.port, pc_input);
+    while (1) {
+        int n = read_serial(&serial, TIMEOUT);
+        printf("%s", (char *)serial.buffer);
+
+        if(!strcmp((char*)serial.buffer, "exit")){
+            break;
+        }else{
+            fgets(pc_input,BUFFER_SIZE,stdin);
+            RS232_cputs(serial.port, pc_input);
+        }
     }
 
     printf("\"exit\" received. Closing port.\n");

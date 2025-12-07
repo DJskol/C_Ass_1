@@ -31,9 +31,11 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="main.c">
+		<Unit filename="rs232.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="rs232.h" />
+		<Unit filename="submission_pc.cpp" />
 		<Extensions />
 	</Project>
 </CodeBlocks_project_file>
