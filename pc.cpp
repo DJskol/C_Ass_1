@@ -14,6 +14,7 @@ Commands to compile and run (only if compilation was successful):
         g++ pc.cpp rs232.c -o pc.exe && .\pc.exe
 Exit the program by pressing Ctrl-C (may require resetting the board on Linux to take effect)
 **************************************************/
+
 #include <stdlib.h>
 #include <stdio.h>
 #ifdef _WIN32
@@ -25,8 +26,9 @@ Exit the program by pressing Ctrl-C (may require resetting the board on Linux to
 
 #define BUFFER_SIZE 256
 
-// This strucure will help supplying serial port data to functions
+// This structure will help supplying serial port data to functions
 // easily by passing single "Serial *" argument instead of many args.
+
 typedef struct {
     int port;
     int baud_rate;
@@ -41,7 +43,7 @@ void reconnect(Serial *serial, int delay_ms=1000);
 int main() {
     // Initialize serial port data
     Serial serial;
-    serial.port = 4;
+    serial.port = 3;
     // serial.port = RS232_GetPortnr("ttyACM0");
     serial.baud_rate = 9600;
     strcpy(serial.mode, "8N1");
