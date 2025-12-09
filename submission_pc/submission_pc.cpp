@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <cstdlib>
 #ifdef _WIN32
 #include <Windows.h>
 #else
@@ -18,6 +19,14 @@ void wait_ms(int ms){
     usleep(ms * 1000);
 #endif
 }
+
+void system_clear(){
+    #ifdef _WIN32
+        system("cls");  // Windows
+    #else
+        system("clear");  // Linux/macOS
+    #endif
+    }
 
 typedef struct {
     int port;
@@ -58,7 +67,7 @@ int read_serial(Serial *serial, int timeout_ms) {
 
 int main(){
     Serial serial;
-    serial.port = 5;
+    serial.port = 3;
     serial.baud_rate = 9600;
     strcpy(serial.mode, "8N1");
     memset(serial.buffer, 0, BUFFER_SIZE);
@@ -80,6 +89,8 @@ int main(){
 
         char* buffer = (char *)serial.buffer;
 
+        //wait_ms(50);
+
         if(!strcmp(buffer, "pc_requested")){
             printf(" ");
             char message[BUFFER_SIZE];
@@ -90,6 +101,12 @@ int main(){
             RS232_cputs(serial.port, "*");
             wait_ms(50);
             RS232_flushTX(serial.port);
+        }else if(!strcmp(buffer, "system_clr")){
+            //printf(" ");
+            system_clear();
+            wait_ms(10);
+            RS232_flushRX(serial.port);
+            RS232_cputs(serial.port, "*");
         }else{
             printf("%s", buffer);
             wait_ms(10);

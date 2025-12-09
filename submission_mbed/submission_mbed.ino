@@ -11,7 +11,7 @@
 
 //Default setup from labscripts
 using namespace mbed;
-USBSerial pc(true); // tx, rx
+USBSerial pc; // tx, rx
 SPI sw(p3, NC, p2);
 TextLCD lcd(p0, p1, p12, p13, p14, p15);
 BusOut bus_out(p20, p19, p18);
@@ -136,8 +136,6 @@ void singleplayer(){
   if(!display_time)return;
   int max_digit = get_digit_range();
   int round_number = 1;
-
-  srand((unsigned)time(NULL));
 
   while(!singleplayer_offline){
     char cpu_rand_array[round_number];
@@ -348,12 +346,30 @@ int main(){
   sw.write(0x0000);
   cs = 1;
   
-  int active = 1;  
+  lcd.locate(0,0);
+  lcd.printf("Welcome Players!");
+   
+  int active = 1; 
 
-  string_pc_output("%s", "\nWelcome Player(s)\n");
+  srand((unsigned)time(NULL));
+
+  string_pc_output("%s", "system_clr");
+
+  string_pc_output("%s", "Welcome Player(s)\n");
+
+  wait_us(2*WAIT_US);
+
+  // string_pc_output("%s", "\n\n\t[ --- GAME START --- ]\n\n");
 
   while(active){
-    string_pc_output("%s","\nPlease Choose Your Game Mode!\n");
+    lcd.cls();
+    lcd.locate(3,0);
+    lcd.printf("[- Menu -]");
+    lcd.locate(0,1);
+    lcd.printf("1>1P .2>2P. 3>EX");
+
+    string_pc_output("%s", "system_clr");
+    string_pc_output("%s","Please Choose Your Game Mode!\n");
     string_pc_output("%s","1: Singleplayer \n2: Multiplayer \n3: Quit \nAnswer:");
 
     get_pc_input(pc_input);
@@ -361,22 +377,54 @@ int main(){
     if(strlen(pc_input) <= 2){
       switch(pc_input[0]){
         case '1':
+          string_pc_output("%s","\n\n\t[ --- SinglePlayer --- ]\n\n");
+          lcd.cls();
+          lcd.locate(0,0);
+          lcd.printf("-=- Loading: -=-");
+          lcd.locate(0,1);
+          lcd.printf("[ SinglePlayer ]");
+          wait_us(2*WAIT_US);
+          lcd.cls();
           singleplayer();
           break;
         case '2':
+          string_pc_output("%s","\n\n\t[ --- Multiplayer --- ]\n\n");
+          lcd.cls();
+          lcd.locate(0,0);
+          lcd.printf("-=- Loading: -=-");
+          lcd.locate(0,1);
+          lcd.printf("[ Multiplayer! ]");
+          wait_us(2*WAIT_US);
+          lcd.cls();
           multiplayer();
           break;
         case '3':
+          lcd.cls();
+          lcd.locate(0,0);
+          lcd.printf("[=- Goodbye! -=]");
+          
           string_pc_output("%s","Goodbye!");
+          wait_us(2*WAIT_US);
+          lcd.cls();
           active = 0;
           break;
         default:
           string_pc_output("%s","Wrong Option, Please Choose Appropriately\n\n");
+          lcd.cls();
+          lcd.locate(0,0);
+          lcd.printf("- Wrong Option -");
+          wait_us(2*WAIT_US);
+          lcd.cls();
           break;
       }
       
     }else{
       string_pc_output("%s","Inputs Amount Error, Please Choose 1 Option from the Menu\n\n");
+      lcd.cls();
+      lcd.locate(0,0);
+      lcd.printf("- Wrong Answer -");
+      wait_us(2*WAIT_US);
+      lcd.cls();
     }
   }
 }
