@@ -11,7 +11,7 @@
 
 //Default setup from labscripts
 using namespace mbed;
-USBSerial pc; // tx, rx
+USBSerial pc(true); // tx, rx
 SPI sw(p3, NC, p2);
 TextLCD lcd(p0, p1, p12, p13, p14, p15);
 BusOut bus_out(p20, p19, p18);
@@ -20,13 +20,14 @@ DigitalOut cs(p5);
 DigitalOut myled(p21); 
 
 char pc_input[MAX_PC_MESSAGE];
-int input_message_length = 0;
+char throwaway_check;
 
 char Keytable[] = { 'F', 'E', 'D', 'C', 
 '3', '6', '9', 'B', 
 '2', '5', '8', '0', 
 '1', '4', '7', 'A'
 };
+
 
 char get_Key(){ 
   int i,j; 
@@ -66,25 +67,36 @@ int get_switches(){
 void clear_serial_monitor(){
   for (int i = 0; i < 100; i++) {
     pc.printf("\n");                //Clear Terminal
+    throwaway_check = pc.getc();
   }
 }
 
-void get_pc_input(char* pc_input, int* input_message_length){  
-  int i = 0;
-  int message_length = 0;
+void get_pc_input(char* pc_input){  
+  wait_us(50000);
+  pc.printf("pc_requested");
+  int message_index = 0;
 
-  pc_input[i] = pc.getc();
-  for(i = 1; i < MAX_PC_MESSAGE && pc.available(); i++){
-    pc_input[i] = pc.getc();
-    message_length += 1;
+  while(1){
+    char recieved_message = pc.getc();
+    // lcd.cls();
+    // lcd.locate(0,0);
+    // lcd.printf("%c",recieved_message);
+    if(recieved_message == '*'){
+      // lcd.printf("Stopped");
+      pc_input[message_index] = '\0';
+      break;
+    }
+    // lcd.printf("%d", message_index);
+    pc_input[message_index] = recieved_message;
+    ++message_index;  
   }
-
-  *input_message_length =  message_length - 1;
+  wait_us(50000);
 }
 
 void singleplayer(){
   int singleplayer_offline = 0;
   int display_time = get_singleplayer_display_time();
+  if(!display_time)return;
   int max_digit = get_digit_range();
   int round_number = 0;
 
@@ -98,28 +110,51 @@ void singleplayer(){
       rand_array[i] = rand_gen(max_digit);
     }
 
+    int display_sequence_length = 10;
+
+    wait_us(50000);
     pc.printf("\n\nSequence: ");
+    throwaway_check = pc.getc();
     for(int i = 0; i < sizeof(rand_array); i++){
+      wait_us(50000);
       pc.printf("%c", rand_array[i]);
+      throwaway_check = pc.getc();
+      display_sequence_length += 1;
     } 
 
     wait_us(display_time * WAIT_US);
+    
+    pc.printf("\r");
+    throwaway_check = pc.getc();
 
-    clear_serial_monitor();
+    for (int i = 0; i < display_sequence_length; i++){
+      wait_us(50000);
+      pc.printf(" ");
+      throwaway_check = pc.getc();
+    }
 
-    get_pc_input(pc_input,&input_message_length);
+    wait_us(50000);
+    pc.printf("\rGuess:");
+    throwaway_check = pc.getc();
+    // clear_serial_monitor();
 
-    for(int i = 0; i < input_message_length; i++){
-      pc.printf("%c", pc_input[i]);
-      if(pc_input[i] != rand_array[i] || input_message_length != sizeof(rand_array)){
+    get_pc_input(pc_input);
+
+    for(int i = 0; i < strlen(pc_input)-1; i++){
+      //pc.printf("%c", pc_input[i]);
+      if(pc_input[i] != rand_array[i] || strlen(pc_input)-1 != sizeof(rand_array)){
         singleplayer_offline = 1;
         break;
-      }else if(i == input_message_length - 1){
+      }else if(i == strlen(pc_input) - 1){
+        wait_us(50000);
         pc.printf("\nSuccess\n");
+        throwaway_check = pc.getc();
       }
     }
   }
+  wait_us(50000);
   pc.printf("\nResult: %d", round_number);
+  throwaway_check = pc.getc();
 }
 
 void multiplayer(){
@@ -146,28 +181,35 @@ void multiplayer(){
     lcd.cls();
 
     pc.printf("\n\nSequence: ");
+    throwaway_check = pc.getc();
     for(int i = 0; i < sizeof(rand_array); i++){
       pc.printf("%c", rand_array[i]);
+      throwaway_check = pc.getc();
     } 
+    pc.printf("\n");
+    throwaway_check = pc.getc();
 
     wait_us(display_time * WAIT_US);
 
-    clear_serial_monitor();
+    // clear_serial_monitor();
 
-    get_pc_input(pc_input,&input_message_length);
+    get_pc_input(pc_input);
 
-    for(int i = 0; i < input_message_length; i++){
+    for(int i = 0; i < strlen(pc_input); i++){
       pc.printf("%c", pc_input[i]);
-      if(pc_input[i] != rand_array[i] || input_message_length != sizeof(rand_array)){
+      throwaway_check = pc.getc();
+      if(pc_input[i] != rand_array[i] || strlen(pc_input) != sizeof(rand_array)){
         multiplayer_offline = 1;
         break;
-      }else if(i == input_message_length - 1){
+      }else if(i == strlen(pc_input) - 1){
         pc.printf("\nSuccess\n");
+        throwaway_check = pc.getc();
       }
     }
 
   }
   pc.printf("\nResult: %d", round_number);
+  throwaway_check = pc.getc();
 }
 
 char rand_gen(int max_digit){
@@ -204,19 +246,22 @@ char rand_gen(int max_digit){
 }
 
 int get_digit_range(){
+  wait_us(50000);
   int max_digit = -1;
 
   while(max_digit == -1){
     pc.printf("\nPlease select the range of possible numbers \nMax Number (1-F): ");
+    throwaway_check = pc.getc();
 
-    get_pc_input(pc_input,&input_message_length);
-
-    if(input_message_length == 1){
+    get_pc_input(pc_input);
+    pc_input[strlen(pc_input)-1] = ' ';
+    if(strlen(pc_input) <= 2){
       int number = atoi(pc_input);
 
       if(number > 0 && number < 10){
         max_digit = number + 1;
       }else{
+        wait_us(50000);
         switch(toupper(pc_input[0])){
           case 'A':
             max_digit = 11;
@@ -238,51 +283,63 @@ int get_digit_range(){
             break;
           default:
             pc.printf("Input Error, Please choose an option between 1-F (Hex)\n\n");
+            throwaway_check = pc.getc();
             break;
         }
       }
     }else{
+      wait_us(50000);
       pc.printf("Too Many Inputs, Please Only 1 Option from the Menu\n\n");
+      throwaway_check = pc.getc();
     }
     // pc.printf("%d\n",max_digit);
   }
-  pc.printf("%c\n",pc_input[0]);
+  // pc.printf("%c\n",pc_input[0]);
   return max_digit;
 }
 
 int get_singleplayer_display_time(){
   int time = -1;
   while(time == -1){
+    wait_us(50000);
     pc.printf("\nSelect your Time Difficulty! \n1: Easy (7s)\n2: Medium (5s)\n3: Hard (2s)\n4: Back \nOption: ");
+    throwaway_check = pc.getc();
     
-    get_pc_input(pc_input,&input_message_length);
+    get_pc_input(pc_input);
     
-    if(input_message_length == 1){
+    if(strlen(pc_input) <= 2){
+      wait_us(50000);
       switch(pc_input[0]){
         case '1':
           time = 7;
-          pc.printf("%d\n", time);
-          pc.printf("\nLoading Easy Mode...\n");
+          // pc.printf("%d\n", time);
+          pc.printf("\n\nLoading Easy Mode...\n");
+          throwaway_check = pc.getc();
           break;
         case '2':
           time = 5;
-          pc.printf("%d\n", time);
-          pc.printf("\nLoading Medium Mode...\n");
+          // pc.printf("%d\n", time);
+          pc.printf("\n\nLoading Medium Mode...\n");
+          throwaway_check = pc.getc();
           break;
         case '3':
           time = 2;
-          pc.printf("%d\n", time);
-          pc.printf("\nLoading Hard Mode...\n");
+          // pc.printf("%d\n", time);
+          pc.printf("\n\nLoading Hard Mode...\n");
+          throwaway_check = pc.getc();
           break;
         case '4':
           time = 0;
           break;
         default:
           pc.printf("Inputs Amount Error, Please Choose 1 Option from the Menu\n\n");
+          throwaway_check = pc.getc();
           break;
       }
     }else{
+      wait_us(50000);
       pc.printf("Too Many Inputs, Please Only 1 Option from the Menu\n\n");
+      throwaway_check = pc.getc();
     }
     // pc.printf("\nTime: %d\n",time);
     return time;
@@ -301,10 +358,14 @@ int get_multiplayer_display_time(){
     char response = key_input();
     int int_response = atoi(&response);
     if (int_response > 0 && int_response < 10){
+      time = int_response;
+
+      lcd.printf("%d", time);
+
       for(int i = 0; i < 3; i++){
         cs = 0;
-        sw.write(0x0055);
-        sw.write(0x0055);
+        sw.write(0x00AA);
+        sw.write(0x00AA);
         cs = 1;
         wait_us(0.4 * WAIT_US);
         cs = 0;
@@ -314,10 +375,10 @@ int get_multiplayer_display_time(){
         wait_us(0.4 * WAIT_US);
       }
 
-      time = int_response;
       break;
     }
   }
+  lcd.cls();
   return time;
 }
 
@@ -331,41 +392,49 @@ int main(){
   sw.write(0x0000);
   cs = 1;
 
-  clear_serial_monitor();
+  // clear_serial_monitor();
   
   int active = 1;  
 
+  pc.printf("\nWelcome Player(s)\n");
+  throwaway_check = pc.getc();
   while(active){
-    pc.printf("\nWelcome Player(s)\n");
+    wait_us(50000);
     pc.printf("\nPlease Choose Your Game Mode!\n");
-    pc.printf("1: Singleplayer \n2: Multiplayer \n3: Quit \nAnswer: ");
+    throwaway_check = pc.getc();
+    pc.printf("1: Singleplayer \n2: Multiplayer \n3: Quit \nAnswer:");
+    throwaway_check = pc.getc();
+    get_pc_input(pc_input);
 
-    get_pc_input(pc_input,&input_message_length);
-
-    if(input_message_length == 1){
-
+    if(strlen(pc_input) <= 2){
+      wait_us(50000);
       switch(pc_input[0]){
         case '1':
-          pc.printf("%c\n",pc_input[0]);
+          // pc.printf("%c\n",pc_input[0]);
           singleplayer();
           break;
         case '2':
-          pc.printf("%c\n",pc_input[0]);
+          // pc.printf("%c\n",pc_input[0]);
           multiplayer();
           break;
         case '3':
-          pc.printf("%c\n",pc_input[0]);
+          // pc.printf("%c\n",pc_input[0]);
           pc.printf("Goodbye!");
+          throwaway_check = pc.getc();
           active = 0;
           break;
         default:
-          pc.printf("%c\n\n",pc_input[0]);
+          // pc.printf("%c\n\n",pc_input[0]);
+          // throwaway_check = pc.getc();
           pc.printf("Wrong Option, Please Choose Appropriately\n\n");
+          throwaway_check = pc.getc();
           break;
       }
       
     }else{
+      wait_us(50000);
       pc.printf("Inputs Amount Error, Please Choose 1 Option from the Menu\n\n");
+      throwaway_check = pc.getc();
     }
   }
 }

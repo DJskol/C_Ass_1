@@ -56,13 +56,11 @@ int read_serial(Serial *serial, int timeout_ms) {
     return connection_status;
 }
 
-
-void clear_pc_serial_rx(int port) {
-    unsigned char dump[256];
-    int n;
-    do {
-        n = RS232_PollComport(port, dump, sizeof(dump));
-    } while (n > 0);
+void trim_end(char *str) {
+    int len = strlen(str);
+    while (len > 0 && (str[len - 1] == '\n' || str[len - 1] == '\r')) {
+        str[--len] = '\0';
+    }
 }
 
 
@@ -81,22 +79,48 @@ int main(){
     }
     puts("Port opened, waiting for ARM Mbed...");
 
-    clear_pc_serial_rx(serial.port);
-
     char pc_input[BUFFER_SIZE];
 
+    RS232_flushRXTX(serial.port);
+
     while (1) {
-        int n = read_serial(&serial, TIMEOUT);
-        printf("%s", (char *)serial.buffer);
-        if(!strcmp((char*)serial.buffer, "Goodbye!")){
-            break;
+        int serial_bytes = read_serial(&serial, TIMEOUT);
+
+        char* buffer = (char *)serial.buffer;
+
+        if(!strcmp(buffer, "pc_requested")){
+            printf(" ");
+            //RS232_flushRX(serial.port);
+            char message[BUFFER_SIZE];
+            //scanf("%s", message);
+            fgets(message,BUFFER_SIZE,stdin);
+            RS232_cputs(serial.port, message);
+            wait_ms(50);
+            RS232_cputs(serial.port, "*");
+            wait_ms(50);
+            RS232_flushTX(serial.port);
         }else{
-            fgets(pc_input,BUFFER_SIZE,stdin);
-            wait_ms(300);
-            if(sizeof(pc_input)>2){
-                RS232_cputs(serial.port, pc_input);
-            }
+            printf("%s", buffer);
+            //wait_ms(50);
+            RS232_flushRX(serial.port);
+            RS232_cputs(serial.port, "*");
+            //wait_ms(50);
         }
+
+        //wait_ms(300);
+
+        if(!strcmp(buffer, "Goodbye!")){
+            wait_ms(50);
+            RS232_cputs(serial.port, "*");
+            RS232_flushRX(serial.port);
+            break;
+        }
+
+
+        //buffer = " ";
+        //memset(serial.buffer, 0, BUFFER_SIZE);
+        //RS232_flushTX(serial.port);
+        RS232_flushRX(serial.port);
     }
 
     RS232_CloseComport(serial.port);
