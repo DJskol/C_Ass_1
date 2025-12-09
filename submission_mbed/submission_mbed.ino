@@ -145,7 +145,7 @@ void singleplayer(){
       if(pc_input[i] != rand_array[i] || strlen(pc_input)-1 != sizeof(rand_array)){
         singleplayer_offline = 1;
         break;
-      }else if(i == strlen(pc_input) - 1){
+      }else if(i == strlen(pc_input)-2){
         wait_us(50000);
         pc.printf("\nSuccess\n");
         throwaway_check = pc.getc();
@@ -153,7 +153,7 @@ void singleplayer(){
     }
   }
   wait_us(50000);
-  pc.printf("\nResult: %d", round_number);
+  pc.printf("\n\nResult: %d", round_number-1);
   throwaway_check = pc.getc();
 }
 
@@ -178,37 +178,58 @@ void multiplayer(){
       lcd.printf("%c",response);
     }
 
+    wait_us(WAIT_US);
+
     lcd.cls();
+
+    int display_sequence_length = 10;
 
     pc.printf("\n\nSequence: ");
     throwaway_check = pc.getc();
     for(int i = 0; i < sizeof(rand_array); i++){
       pc.printf("%c", rand_array[i]);
       throwaway_check = pc.getc();
+      display_sequence_length += 1;
     } 
-    pc.printf("\n");
-    throwaway_check = pc.getc();
+
 
     wait_us(display_time * WAIT_US);
 
-    // clear_serial_monitor();
+    pc.printf("\r");
+    throwaway_check = pc.getc();
+
+    for (int i = 0; i < display_sequence_length; i++){
+      wait_us(50000);
+      pc.printf(" ");
+      throwaway_check = pc.getc();
+    }
+
+    wait_us(50000);
+    pc.printf("\rGuess:");
+    throwaway_check = pc.getc();
+    // pc.printf("%c", throwaway_check);
 
     get_pc_input(pc_input);
+    wait_us(50000);
+    lcd.printf("%s", pc_input);
+    // throwaway_check = pc.getc();
 
-    for(int i = 0; i < strlen(pc_input); i++){
-      pc.printf("%c", pc_input[i]);
-      throwaway_check = pc.getc();
-      if(pc_input[i] != rand_array[i] || strlen(pc_input) != sizeof(rand_array)){
+    for(int i = 0; i < strlen(pc_input)-1; i++){
+      // wait_us(50000);
+      // pc.printf("%c %c", pc_input[i], rand_array[i]);
+      // throwaway_check = pc.getc();
+      if(pc_input[i] != rand_array[i] || strlen(pc_input)-1 != sizeof(rand_array)){
         multiplayer_offline = 1;
         break;
       }else if(i == strlen(pc_input) - 1){
+        wait_us(50000);
         pc.printf("\nSuccess\n");
         throwaway_check = pc.getc();
       }
     }
 
   }
-  pc.printf("\nResult: %d", round_number);
+  pc.printf("\n\nResult: %d", round_number-1);
   throwaway_check = pc.getc();
 }
 
@@ -302,7 +323,7 @@ int get_singleplayer_display_time(){
   int time = -1;
   while(time == -1){
     wait_us(50000);
-    pc.printf("\nSelect your Time Difficulty! \n1: Easy (7s)\n2: Medium (5s)\n3: Hard (2s)\n4: Back \nOption: ");
+    pc.printf("\nSelect your Time Difficulty! \n1: Easy (5s)\n2: Medium (3s)\n3: Hard (1s)\n4: Back \nOption: ");
     throwaway_check = pc.getc();
     
     get_pc_input(pc_input);
@@ -311,19 +332,19 @@ int get_singleplayer_display_time(){
       wait_us(50000);
       switch(pc_input[0]){
         case '1':
-          time = 7;
+          time = 5;
           // pc.printf("%d\n", time);
           pc.printf("\n\nLoading Easy Mode...\n");
           throwaway_check = pc.getc();
           break;
         case '2':
-          time = 5;
+          time = 3;
           // pc.printf("%d\n", time);
           pc.printf("\n\nLoading Medium Mode...\n");
           throwaway_check = pc.getc();
           break;
         case '3':
-          time = 2;
+          time = 1;
           // pc.printf("%d\n", time);
           pc.printf("\n\nLoading Hard Mode...\n");
           throwaway_check = pc.getc();
@@ -352,11 +373,11 @@ int get_multiplayer_display_time(){
   while(1){
     lcd.cls();
     lcd.locate(0,0);
-    lcd.printf("Timer (1-9): ");
-    lcd.locate(0,1);
+    lcd.printf("Timer (1-9):");
 
     char response = key_input();
     int int_response = atoi(&response);
+    lcd.printf(" ");
     if (int_response > 0 && int_response < 10){
       time = int_response;
 

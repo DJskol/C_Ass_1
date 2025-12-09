@@ -34,7 +34,7 @@ void reconnect(Serial *serial, int delay_ms) {
             RS232_CloseComport(serial->port);
         } catch (int e) { }
     } while (RS232_OpenComport(serial->port, serial->baud_rate, serial->mode, 0));
-    puts("Reconnected successfully.\n");
+    puts("\nReconnected successfully.\n");
 }
 
 int read_serial(Serial *serial, int timeout_ms) {
@@ -56,17 +56,9 @@ int read_serial(Serial *serial, int timeout_ms) {
     return connection_status;
 }
 
-void trim_end(char *str) {
-    int len = strlen(str);
-    while (len > 0 && (str[len - 1] == '\n' || str[len - 1] == '\r')) {
-        str[--len] = '\0';
-    }
-}
-
-
 int main(){
     Serial serial;
-    serial.port = 3;
+    serial.port = 5;
     serial.baud_rate = 9600;
     strcpy(serial.mode, "8N1");
     memset(serial.buffer, 0, BUFFER_SIZE);
@@ -101,7 +93,7 @@ int main(){
             RS232_flushTX(serial.port);
         }else{
             printf("%s", buffer);
-            //wait_ms(50);
+            wait_ms(10);
             RS232_flushRX(serial.port);
             RS232_cputs(serial.port, "*");
             //wait_ms(50);
@@ -120,7 +112,7 @@ int main(){
         //buffer = " ";
         //memset(serial.buffer, 0, BUFFER_SIZE);
         //RS232_flushTX(serial.port);
-        RS232_flushRX(serial.port);
+        //RS232_flushRX(serial.port);
     }
 
     RS232_CloseComport(serial.port);
