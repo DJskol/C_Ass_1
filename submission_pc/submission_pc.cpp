@@ -82,10 +82,9 @@ int main(){
 
         if(!strcmp(buffer, "pc_requested")){
             printf(" ");
-            //RS232_flushRX(serial.port);
             char message[BUFFER_SIZE];
-            //scanf("%s", message);
             fgets(message,BUFFER_SIZE,stdin);
+
             RS232_cputs(serial.port, message);
             wait_ms(50);
             RS232_cputs(serial.port, "*");
@@ -96,10 +95,7 @@ int main(){
             wait_ms(10);
             RS232_flushRX(serial.port);
             RS232_cputs(serial.port, "*");
-            //wait_ms(50);
         }
-
-        //wait_ms(300);
 
         if(!strcmp(buffer, "Goodbye!")){
             wait_ms(50);
@@ -107,12 +103,6 @@ int main(){
             RS232_flushRX(serial.port);
             break;
         }
-
-
-        //buffer = " ";
-        //memset(serial.buffer, 0, BUFFER_SIZE);
-        //RS232_flushTX(serial.port);
-        //RS232_flushRX(serial.port);
     }
 
     RS232_CloseComport(serial.port);
