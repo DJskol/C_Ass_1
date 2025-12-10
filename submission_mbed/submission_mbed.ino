@@ -96,28 +96,45 @@ void char_pc_output(char* format, char letter){
   pc.printf(format, letter);
   throwaway_check = pc.getc();
 }
-
+// void play_sfx(){}
 void gameplay(int* gamemode_offline,char* rand_array, int display_time){
+  lcd.cls();
+  lcd.locate(0,0);
+  lcd.printf("Sequence: ");
+  lcd.locate(0,1);
+
   int display_sequence_length = 10;
 
-  string_pc_output("%s","\n\nSequence: ");
+  string_pc_output("%s","\nSequence: ");
 
   for(int i = 0; i < strlen(rand_array); i++){
     char_pc_output("%c", rand_array[i]);
+    lcd.printf("%c", rand_array[i]);
     display_sequence_length += 1;
   } 
 
   wait_us(display_time * WAIT_US);
   
+  lcd.locate(0,1);
   string_pc_output("%s","\r");
 
   for (int i = 0; i < display_sequence_length; i++){
     string_pc_output("%s"," ");
+    lcd.printf(" ");
   }
+
+  lcd.cls();
 
   string_pc_output("%s","\rGuess:");
 
+  lcd.locate(0,0);
+  lcd.printf("Guess:");
+  lcd.locate(0,1);
+
   get_pc_input(pc_input);
+  lcd.printf("%s", pc_input);
+
+  wait_us(WAIT_US);
 
   for(int i = 0; i < strlen(pc_input)-1; i++){
     // string_pc_output("%s","%d %d ", strlen(pc_input), strlen(rand_array));
@@ -125,7 +142,12 @@ void gameplay(int* gamemode_offline,char* rand_array, int display_time){
       *gamemode_offline = 1;
       break;
     }else if(i == strlen(pc_input)-2){
-      string_pc_output("%s","\nSuccess\n");
+      string_pc_output("%s","Correct!\n");
+      lcd.cls();
+      lcd.locate(0,0);
+      lcd.printf("[ - Correct! - ]");
+      wait_us(2*WAIT_US);
+      lcd.cls();
     }
   }
 }
@@ -149,9 +171,28 @@ void singleplayer(){
     round_number += 1;
   }
   int_pc_output("\n\nResult: %d", round_number-1);
+  lcd.cls();
+  lcd.locate(0,0);
+  lcd.printf("Result: %d",round_number-1);
+  wait_us(3*WAIT_US);
+  lcd.cls();
 }
 
 void multiplayer(){
+
+  lcd.cls();
+  lcd.locate(0,0);
+  lcd.printf("   -=- P2 -=-   ");
+  string_pc_output("%s","\n   -=- P1 -=-   \n");
+  wait_us(2*WAIT_US);
+
+  lcd.cls();
+  lcd.locate(0,0);
+  lcd.printf("[- GAME START -]");
+  string_pc_output("%s","\n\t[-- GAME START --]\n");
+  wait_us(0.5*WAIT_US);
+  string_pc_output("%s","waiting for P2...\n");
+  
   int multiplayer_offline = 0;
   int display_time = get_multiplayer_display_time();
   int round_number = 0;
@@ -159,6 +200,8 @@ void multiplayer(){
   while(!multiplayer_offline){
     round_number += 1;
     char p2_rand_array[round_number];
+
+    string_pc_output("%s","\nwaiting for P2...\n");
 
     lcd.cls();
     lcd.locate(0,0);
@@ -181,6 +224,11 @@ void multiplayer(){
 
   }
   int_pc_output("\n\nResult: %d\n", round_number-1);
+  lcd.cls();
+  lcd.locate(0,0);
+  lcd.printf("Result: %d",round_number-1);
+  wait_us(3*WAIT_US);
+  lcd.cls();
 }
 
 char rand_gen(int max_digit){
@@ -217,15 +265,22 @@ char rand_gen(int max_digit){
 int get_digit_range(){
   wait_us(50000);
   int max_digit = -1;
-
+  
   while(max_digit == -1){
     string_pc_output("%s","\nPlease select the range of possible numbers \nMax Number (1-F): ");
+
+    lcd.cls();
+    lcd.locate(0,0);
+    lcd.printf("Max Num (1-F): ");
 
     get_pc_input(pc_input);
 
     pc_input[strlen(pc_input)-1] = ' ';
 
     if(strlen(pc_input) <= 2){
+      lcd.printf("%s",pc_input);
+      wait_us(2*WAIT_US);
+
       int number = atoi(pc_input);
 
       if(number > 0 && number < 10){
@@ -252,15 +307,26 @@ int get_digit_range(){
             max_digit = 16;
             break;
           default:
-            string_pc_output("%s","Input Error, Please choose an option between 1-F (Hex)\n\n");
+            string_pc_output("%s","\nWrong Option, Please Choose Appropriately\n");
+            lcd.cls();
+            lcd.locate(0,0);
+            lcd.printf("- Wrong Option -");
+            wait_us(2*WAIT_US);
+            lcd.cls();
             break;
         }
       }
     }else{
-      string_pc_output("%s","Too Many Inputs, Please Only 1 Option from the Menu\n\n");
+      string_pc_output("%s","\nToo Many Inputs, Please Only 1 Option from the Menu\n");
+      lcd.cls();
+      lcd.locate(0,0);
+      lcd.printf("- Wrong Answer -");
+      wait_us(2*WAIT_US);
+      lcd.cls();
     }
     // string_pc_output("%s","%d\n",max_digit);
   }
+  lcd.cls();
   // string_pc_output("%s","%c\n",pc_input[0]);
   return max_digit;
 }
@@ -270,68 +336,123 @@ int get_singleplayer_display_time(){
   while(time == -1){
     string_pc_output("%s","\nSelect your Time Difficulty! \n1: Easy (5s)\n2: Medium (3s)\n3: Hard (1s)\n4: Back \nOption: ");
     
+    lcd.cls();
+    lcd.locate(0,0);
+    lcd.printf(" -=-  Time  -=- ");
+    lcd.locate(0,1);
+    lcd.printf("1:E 2:M 3:H 4:<<");
+    
     get_pc_input(pc_input);
     
     if(strlen(pc_input)-1 == 1){
       switch(pc_input[0]){
         case '1':
           time = 5;
-          string_pc_output("%s","\n\nLoading Easy Mode...\n");
+          string_pc_output("%s","\nLoading Easy Mode...\n");
+          lcd.cls();
+          lcd.locate(0,0);
+          lcd.printf(" - Easy Mode! - ");
+          wait_us(2*WAIT_US);
+          lcd.cls();
           break;
         case '2':
           time = 3;
-          string_pc_output("%s","\n\nLoading Medium Mode...\n");
+          string_pc_output("%s","\nLoading Medium Mode...\n");
+          lcd.cls();
+          lcd.locate(0,0);
+          lcd.printf(" -Medium Mode- ");
+          wait_us(2*WAIT_US);
+          lcd.cls();
           break;
         case '3':
           time = 1;
-          string_pc_output("%s","\n\nLoading Hard Mode...\n");
+          string_pc_output("%s","\nLoading Hard Mode...\n");
+          lcd.cls();
+          lcd.locate(0,0);
+          lcd.printf(" - Hard Mode! - ");
+          wait_us(2*WAIT_US);
+          lcd.cls();
           break;
         case '4':
           time = 0;
           break;
         default:
-          string_pc_output("%s","Inputs Amount Error, Please Choose 1 Option from the Menu\n\n");
+          string_pc_output("%s","\nWrong Option, Please Choose Appropriately\n");
+          lcd.cls();
+          lcd.locate(0,0);
+          lcd.printf("- Wrong Option -");
+          wait_us(2*WAIT_US);
+          lcd.cls();
           break;
       }
     }else{
-      string_pc_output("%s","Too Many Inputs, Please Only 1 Option from the Menu\n\n");
+      string_pc_output("%s","\nToo Many Inputs, Please Only 1 Option from the Menu\n");
+      lcd.cls();
+      lcd.locate(0,0);
+      lcd.printf("- Wrong Answer -");
+      wait_us(2*WAIT_US);
+      lcd.cls();
     }
   }
+  wait_us(WAIT_US);
+  lcd.cls();
   return time;
 }
 
 int get_multiplayer_display_time(){
   int time;
-
+  int int_response;
+  
+  
   while(1){
     lcd.cls();
     lcd.locate(0,0);
-    lcd.printf("Timer (1-9):");
+    lcd.printf("Time Set(1-9):");
 
     char response = key_input();
-    int int_response = atoi(&response);
+    int_response = atoi(&response);
     lcd.printf(" ");
     if (int_response > 0 && int_response < 10){
       time = int_response;
 
       lcd.printf("%d", time);
 
-      for(int i = 0; i < 3; i++){
+      for(int i = 0; i < 2; i++){
         cs = 0;
         sw.write(0x00AA);
         sw.write(0x00AA);
         cs = 1;
-        wait_us(0.4 * WAIT_US);
+        wait_us(0.2 * WAIT_US);
         cs = 0;
         sw.write(0x0000);
         sw.write(0x0000);
         cs = 1;
-        wait_us(0.4 * WAIT_US);
+        wait_us(0.2 * WAIT_US);
       }
 
       break;
+    }else{
+      lcd.cls();
+      lcd.locate(0,0);
+      lcd.printf("- Wrong Option -");
+      
+      for(int i = 0; i < 2; i++){
+        cs = 0;
+        sw.write(0x0055);
+        sw.write(0x0055);
+        cs = 1;
+        wait_us(0.2 * WAIT_US);
+        cs = 0;
+        sw.write(0x0000);
+        sw.write(0x0000);
+        cs = 1;
+        wait_us(0.2 * WAIT_US);
+      }
+      lcd.cls();
     }
   }
+  int_pc_output("\nTime Set: %d", int_response);
+  wait_us(2 * WAIT_US);
   lcd.cls();
   return time;
 }
@@ -419,7 +540,7 @@ int main(){
       }
       
     }else{
-      string_pc_output("%s","Inputs Amount Error, Please Choose 1 Option from the Menu\n\n");
+      string_pc_output("%s","Too Many Inputs, Please Choose 1 Option from the Menu\n\n");
       lcd.cls();
       lcd.locate(0,0);
       lcd.printf("- Wrong Answer -");
