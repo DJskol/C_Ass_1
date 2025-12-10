@@ -8,9 +8,9 @@ using namespace mbed;
 PwmOut buzzer(p27);
 
 
-float song_freq[] = {466,466,415,415,698,698,622};
+float intro_song_freq[] = {466,466,415,415,698,698,622};
 
-float song_beat[] = {1,1,1,1,3,3,6};
+float intro_song_beat[] = {1,1,1,1,3,3,6};
 
 float correct_freq[] = {800, 1000};
 float correct_beat[] = {2,4};
@@ -25,11 +25,11 @@ int main() {
     while (1) {
         //RickRoll - Start
         for(int i = 0; i < 7; i++){
-          buzzer.period(1.0f / (1.5f * song_freq[i]));
+          buzzer.period(1.0f / (1.5f * intro_song_freq[i]));
           buzzer = 0.5f;
-          wait_us(song_beat[i] * WAIT_US);
+          wait_us(intro_song_beat[i] * WAIT_US);
           buzzer = 0.0f;
-          wait_us(song_beat[i] * WAIT_US * 0.30f);
+          wait_us(intro_song_beat[i] * WAIT_US * 0.30f);
         }
         wait_us(3000000);
 

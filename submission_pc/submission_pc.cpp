@@ -66,6 +66,8 @@ int read_serial(Serial *serial, int timeout_ms) {
 }
 
 int main(){
+    FILE* file;
+    file = fopen("","w")
     Serial serial;
     serial.port = 3;
     serial.baud_rate = 9600;
@@ -102,6 +104,12 @@ int main(){
             wait_ms(50);
             RS232_flushTX(serial.port);
         }else if(!strcmp(buffer, "system_clr")){
+            //printf(" ");
+            system_clear();
+            wait_ms(10);
+            RS232_flushRX(serial.port);
+            RS232_cputs(serial.port, "*");
+        }else if(!strcmp(buffer, "system_save")){
             //printf(" ");
             system_clear();
             wait_ms(10);
