@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "sounds.h": "c",
+        "cerrno": "cpp",
+        "components.h": "c"
+    }
+}

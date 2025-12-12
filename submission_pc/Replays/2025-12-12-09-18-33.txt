@@ -1,0 +1,48 @@
+
+	[-- GAME START --]
+waiting for P2...
+
+Time Set: 1
+waiting for P2...
+
+Sequence: 2           Guess:2
+Correct!
+
+waiting for P2...
+
+Sequence: E9            Guess:E9
+Correct!
+
+waiting for P2...
+
+Sequence: 8EF             Guess:8EF
+Correct!
+
+waiting for P2...
+
+Sequence: 5656              Guess:5656
+Correct!
+
+waiting for P2...
+
+Sequence: D0B97               Guess:D0B97
+Correct!
+
+waiting for P2...
+
+Sequence: 554179                Guess:554179
+Correct!
+
+waiting for P2...
+
+Sequence: D6B8C50                 Guess:D6B850
+Wrong!
+
+
+Score: 6
+Play again? (Y/N): N
+
+Save Game Replay? (Y/N): Y
+
+	  [-- SAVED --]
+	[-- GAME END --]

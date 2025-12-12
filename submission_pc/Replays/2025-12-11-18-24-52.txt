@@ -1,0 +1,49 @@
+
+	[-- GAME START --]
+waiting for P2...
+
+Time Set: 2
+waiting for P2...
+
+Sequence: 1           Guess:1
+Correct!
+
+waiting for P2...
+
+Sequence: 55            Guess:56
+Wrong!
+
+
+Score: 1
+Play again? (Y/N): y
+
+	[-- RESTART! --]
+
+waiting for P2...
+
+Sequence: 5           Guess:5
+Correct!
+
+waiting for P2...
+
+Sequence: 12            Guess:12
+Correct!
+
+waiting for P2...
+
+Sequence: 999             Guess:999
+Correct!
+
+waiting for P2...
+
+Sequence: 8000              Guess:8001
+Wrong!
+
+
+Score: 3
+Play again? (Y/N): n
+
+Save Game Replay? (Y/N): y
+
+	  [-- SAVED --]
+	[-- GAME END --]

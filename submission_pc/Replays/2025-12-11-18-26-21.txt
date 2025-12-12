@@ -1,0 +1,17 @@
+
+	[-- GAME START --]
+
+Sequence: A           Guess:A
+Correct!
+
+Sequence: 77            Guess:67
+Wrong!
+
+
+Score: 1
+Play again? (Y/N): N
+
+Save Game Replay? (Y/N): Y
+
+	  [-- SAVED --]
+	[-- GAME END --]

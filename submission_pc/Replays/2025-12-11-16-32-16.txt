@@ -1,0 +1,31 @@
+
+	[-- GAME START --]
+
+Sequence: 5
+           
+Guess:5
+Correct!
+
+Sequence: 20
+            
+Guess:20
+Correct!
+
+Sequence: 423
+             
+Guess:423
+Correct!
+
+Sequence: 3005
+              
+Guess:300
+Wrong!
+
+
+Score: 3
+Play again? (Y/N): n
+
+Save Game Replay? (Y/N): y
+
+	  [-- SAVED --]
+	[-- GAME END --]

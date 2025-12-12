@@ -1,17 +1,23 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <cstdlib>
-#ifdef _WIN32
-#include <Windows.h>
-#else
-#include <unistd.h>
-#endif
+#include <time.h>
+#include <string>
 #include "rs232.h"
+#include "file_hanlder.c"
 
 #define BUFFER_SIZE 256
 #define RECONNECTION_TIMER 1000
 #define TIMEOUT 10
 
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
+
+using namespace std;
+/*
 void wait_ms(int ms){
 #ifdef _WIN32
     Sleep(ms);
@@ -19,7 +25,7 @@ void wait_ms(int ms){
     usleep(ms * 1000);
 #endif
 }
-
+*/
 void system_clear(){
     #ifdef _WIN32
         system("cls");  // Windows
@@ -65,9 +71,13 @@ int read_serial(Serial *serial, int timeout_ms) {
     return connection_status;
 }
 
+
 int main(){
-    FILE* file;
-    file = fopen("","w")
+    //initialize vaariables
+    int record;
+    char pc_cache[2000000] = " "; //record storage
+    char message[BUFFER_SIZE];
+
     Serial serial;
     serial.port = 3;
     serial.baud_rate = 9600;
@@ -82,55 +92,72 @@ int main(){
     }
     puts("Port opened, waiting for ARM Mbed...");
 
-    char pc_input[BUFFER_SIZE];
 
     RS232_flushRXTX(serial.port);
 
     while (1) {
-        int serial_bytes = read_serial(&serial, TIMEOUT);
+        int buffer_bytes = read_serial(&serial, TIMEOUT);
 
         char* buffer = (char *)serial.buffer;
-
-        //wait_ms(50);
-
-        if(!strcmp(buffer, "pc_requested")){
+        //The following if else statements are commands/keywords for specific functions
+        if(!strcmp(buffer, "pc_requested")){//determines if input is needed
+            memset(message,'\0', sizeof(message));
             printf(" ");
-            char message[BUFFER_SIZE];
-            fgets(message,BUFFER_SIZE,stdin);
+            fgets(message,BUFFER_SIZE,stdin);//gets user input
 
-            RS232_cputs(serial.port, message);
+            if(record){
+                strcat(pc_cache, message);  //records user input if recording is active
+            }
+
+            RS232_cputs(serial.port, message);//send message
             wait_ms(50);
-            RS232_cputs(serial.port, "*");
+            RS232_cputs(serial.port, "*");//send end bit
             wait_ms(50);
             RS232_flushTX(serial.port);
-        }else if(!strcmp(buffer, "system_clr")){
-            //printf(" ");
+        }else if(!strcmp(buffer, "system_clr")){//clears the pc terminal
             system_clear();
             wait_ms(10);
             RS232_flushRX(serial.port);
-            RS232_cputs(serial.port, "*");
-        }else if(!strcmp(buffer, "system_save")){
-            //printf(" ");
-            system_clear();
-            wait_ms(10);
-            RS232_flushRX(serial.port);
-            RS232_cputs(serial.port, "*");
-        }else{
-            printf("%s", buffer);
-            wait_ms(10);
-            RS232_flushRX(serial.port);
-            RS232_cputs(serial.port, "*");
-        }
-
-        if(!strcmp(buffer, "Goodbye!")){
+            RS232_cputs(serial.port, "*");//send end bit
+        }else if(!strcmp(buffer, "system_load")){//loads previous replay saves
+            replay_files();
+            wait_ms(4000);
+            RS232_cputs(serial.port, "*");//send end bit
             wait_ms(50);
-            RS232_cputs(serial.port, "*");
+            RS232_flushTX(serial.port);
+        }else if(!strcmp(buffer, "system_save")){//save the pc_cache replay
+            save_replay(pc_cache);
             RS232_flushRX(serial.port);
-            break;
+            RS232_cputs(serial.port, "*");//send end bit
+            wait_ms(50);
+            RS232_flushTX(serial.port);
+        }else{
+            if(!strcmp(buffer,"\n\t[-- GAME START --]\n")){//starts recording
+                record = 1;
+                memset(pc_cache, '\0', sizeof(pc_cache));//set the recording data to 0
+            }
+            if(record){
+                strcat(pc_cache, buffer);//records text
+            }
+            if(!strcmp(buffer,"\n\t[-- GAME END --]\n")){
+                record = 0;
+                memset(pc_cache, '\0', sizeof(pc_cache));//set the recording data to 0
+            }
+            if(!strcmp(buffer, "Goodbye!")){
+                wait_ms(50);
+                RS232_cputs(serial.port, "*");//send end bit
+                RS232_flushRX(serial.port);
+                break;
+            }
+
+            printf("%s", buffer);//display message
+            wait_ms(10);
+            RS232_flushRX(serial.port);
+            RS232_cputs(serial.port, "*");//send end bit
         }
     }
 
-    RS232_CloseComport(serial.port);
+    RS232_CloseComport(serial.port);//close the serial port
 
     return 0;
 }

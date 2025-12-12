@@ -1,0 +1,14 @@
+
+	[-- GAME START --]
+
+Sequence: 1           Guess:0
+Wrong!
+
+
+Score: 0
+Play again? (Y/N): n
+
+Save Game Replay? (Y/N): y
+
+	  [-- SAVED --]
+	[-- GAME END --]
